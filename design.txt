@@ -1,0 +1,29 @@
+What additional properties did you add to your models and why?
+
+- Score in the user model: 
+I added the property ‘score’ to the user model to sort the users by score. I use this property in the ‘get_user_rankings’ endpoint which returns a list with users sorted by ranking. The score is increased when a player wins a game and decreased when a player loses a game
+
+- Active_games in the user model: 
+I added the property ‘active_games’ to the user-model to filter users. I use this property in the cron-job. I only want to send emails to players with active games and needed a way to filter the users.
+
+- History in the games model: 
+I added the property ‘history’ to the games-model. With this property i can record all moves a users makes. I used this property in the helper function inside ‘main.py’
+
+
+What were some of the trade-offs or struggles you faced when implementing the new game logic?
+
+- No sql: 
+I used to work with a sql-database ('MySql') and i searched a long time on the web how to do a join query with ’Google Cloud Datastore’. It was not direct clear for me that ‘Google Cloud Datastore’ didn’t support sql functions like join.
+
+- Test environment:
+I had some troubles with setting up my test-environment. I work on a macbook with osx and the documentation provided by udacity didn't work out for me. I ended up with installing Google Cloud Console.
+
+- Google Chrome: 
+The list with endpoints didn’t load the first time i opened the api-explorer in Google Chrome. I googled for solutions and found something about starting Google Chrome with the console. I tried to follow the instructions but this didn’t work for me. I finally found a little shield icon in the url-bar where you can configure some options in Google Chrome about loading unsafe assets. After changing the settings Google Chrome showed me the list with endpoints.
+
+- PickleProperty:
+I was searching for a solution to save something like a object and didn't know from the existence of the ‘PickleProperty’. Finally i found in the app engine documentation about the ‘PickleProperty’.
+var_dump: With a PHP background i am used to debug with the PHPfunction ‘var_dump’. I searched the web for a python equivalent. I found a solution on stackoverflow and use the python pprint-module for debugging.
+
+- Google Cloud Console: 
+The database seems un-indexed after deploying my app with google cloud console to google app engine. Finally found out that you need to specify a parameter in the console for deploying your app with the index config file.

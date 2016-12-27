@@ -2,36 +2,46 @@
 entities used by the Game. Because these classes are also regular Python
 classes they can include methods (such as 'to_form' and 'new_game')."""
 
-import random
 from datetime import date
-from protorpc import messages
+
 from google.appengine.ext import ndb
+
+from protorpc import messages
 
 
 class User(ndb.Model):
     """User profile"""
     name = ndb.StringProperty(required=True)
-    email =ndb.StringProperty()
+    email = ndb.StringProperty()
+    score = ndb.IntegerProperty(default=0)
+    active_games = ndb.IntegerProperty(default=0)
+
+    def to_form(self):
+        form = UserForm()
+        form.name = self.name
+        form.email = self.email
+        form.score = self.score
+        return form
 
 
 class Game(ndb.Model):
     """Game object"""
-    target = ndb.IntegerProperty(required=True)
+    answer = ndb.StringProperty(required=True)
     attempts_allowed = ndb.IntegerProperty(required=True)
     attempts_remaining = ndb.IntegerProperty(required=True, default=5)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
+    history = ndb.PickleProperty(required=True, default=[])
 
     @classmethod
-    def new_game(cls, user, min, max, attempts):
+    def new_game(cls, user, answer, attempts):
         """Creates and returns a new game"""
-        if max < min:
-            raise ValueError('Maximum must be greater than minimum')
         game = Game(user=user,
-                    target=random.choice(range(1, max + 1)),
+                    answer=answer,
                     attempts_allowed=attempts,
                     attempts_remaining=attempts,
                     game_over=False)
+        game.history = []
         game.put()
         return game
 
@@ -55,6 +65,10 @@ class Game(ndb.Model):
                       guesses=self.attempts_allowed - self.attempts_remaining)
         score.put()
 
+    def add_game_history(self, result, guess):
+        self.history.append({'message': result, 'guess': guess})
+        self.put()
+
 
 class Score(ndb.Model):
     """Score object"""
@@ -77,17 +91,25 @@ class GameForm(messages.Message):
     user_name = messages.StringField(5, required=True)
 
 
+class HighScoresForm(messages.Message):
+    """ScoreForm for outbound High-Score information"""
+    number_of_results = messages.IntegerField(1)
+
+
 class NewGameForm(messages.Message):
     """Used to create a new game"""
     user_name = messages.StringField(1, required=True)
-    min = messages.IntegerField(2, default=1)
-    max = messages.IntegerField(3, default=10)
     attempts = messages.IntegerField(4, default=5)
 
 
-class MakeMoveForm(messages.Message):
-    """Used to make a move in an existing game"""
-    guess = messages.IntegerField(1, required=True)
+class GuessCharactarForm(messages.Message):
+    """Used to guess a character in an existing game"""
+    guess = messages.StringField(1, required=True)
+
+
+class GuessAnswerForm(messages.Message):
+    """Used to guess a answer in an existing game"""
+    guess = messages.StringField(1, required=True)
 
 
 class ScoreForm(messages.Message):
@@ -98,9 +120,26 @@ class ScoreForm(messages.Message):
     guesses = messages.IntegerField(4, required=True)
 
 
+class UserForm(messages.Message):
+    """Userform for outbound User information"""
+    name = messages.StringField(1, required=True)
+    email = messages.StringField(2)
+    score = messages.IntegerField(3, default=0)
+
+
 class ScoreForms(messages.Message):
     """Return multiple ScoreForms"""
     items = messages.MessageField(ScoreForm, 1, repeated=True)
+
+
+class GameForms(messages.Message):
+    """Return multiple GameForms"""
+    items = messages.MessageField(GameForm, 1, repeated=True)
+
+
+class UserForms(messages.Message):
+    """Return multiple UserForms"""
+    items = messages.MessageField(UserForm, 1, repeated=True)
 
 
 class StringMessage(messages.Message):
