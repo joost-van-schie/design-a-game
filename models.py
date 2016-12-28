@@ -12,7 +12,7 @@ from protorpc import messages
 class User(ndb.Model):
     """User profile"""
     name = ndb.StringProperty(required=True)
-    email = ndb.StringProperty()
+    email = ndb.StringProperty(required=True)
     score = ndb.IntegerProperty(default=0)
     active_games = ndb.IntegerProperty(default=0)
 

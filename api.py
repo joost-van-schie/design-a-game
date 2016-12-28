@@ -253,7 +253,7 @@ class HangmanApi(remote.Service):
                       response_message=ScoreForms,
                       path='high_scores',
                       name='get_high_scores',
-                      http_method='POST')
+                      http_method='GET')
     def get_high_scores(self, request):
         """Return high-scores"""
         high_scores_query = Score.query(Score.won == True).order(Score.guesses)
